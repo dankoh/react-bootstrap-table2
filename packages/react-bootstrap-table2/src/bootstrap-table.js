@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import cs from 'classnames';
-
+import { FixedSizeList as List } from "react-window";
 import Header from './header';
 import Filters from './filters';
 import Caption from './caption';
@@ -38,9 +38,9 @@ class BootstrapTable extends PropsBaseResolver(Component) {
     if (overlay) {
       const LoadingOverlay = overlay(loading);
       return (
-        <LoadingOverlay>
-          { this.renderTable() }
-        </LoadingOverlay>
+          <LoadingOverlay>
+            { this.renderTable() }
+          </LoadingOverlay>
       );
     }
     return this.renderTable();
@@ -84,68 +84,71 @@ class BootstrapTable extends PropsBaseResolver(Component) {
     const hasFooter = _.filter(columns, col => _.has(col, 'footer')).length > 0;
 
     const tableCaption = (
-      caption && <Caption bootstrap4={ bootstrap4 }>{ caption }</Caption>
+        caption && <Caption bootstrap4={ bootstrap4 }>{ caption }</Caption>
     );
 
     return (
-      <div className={ tableWrapperClass }>
-        <table id={ id } className={ tableClass }>
-          { tableCaption }
-          <Header
-            columns={ columns }
-            className={ this.props.headerClasses }
-            wrapperClasses={ this.props.headerWrapperClasses }
-            sortField={ this.props.sortField }
-            sortOrder={ this.props.sortOrder }
-            onSort={ this.props.onSort }
-            globalSortCaret={ this.props.sort && this.props.sort.sortCaret }
-            onFilter={ this.props.onFilter }
-            currFilters={ this.props.currFilters }
-            onExternalFilter={ this.props.onExternalFilter }
-            selectRow={ selectRow }
-            expandRow={ expandRow }
-            filterPosition={ filterPosition }
-          />
-          {hasFilters && filterPosition !== Const.FILTERS_POSITION_INLINE && (
-            <Filters
+        <div className={ tableWrapperClass }>
+          <table id={ id } style={{ marginBottom: 0 }} className={ tableClass }>
+            { tableCaption }
+            <Header
+                columns={ columns }
+                className={ this.props.headerClasses }
+                wrapperClasses={ this.props.headerWrapperClasses }
+                sortField={ this.props.sortField }
+                sortOrder={ this.props.sortOrder }
+                onSort={ this.props.onSort }
+                globalSortCaret={ this.props.sort && this.props.sort.sortCaret }
+                onFilter={ this.props.onFilter }
+                currFilters={ this.props.currFilters }
+                onExternalFilter={ this.props.onExternalFilter }
+                selectRow={ selectRow }
+                expandRow={ expandRow }
+                filterPosition={ filterPosition }
+            />
+            {hasFilters && filterPosition !== Const.FILTERS_POSITION_INLINE && (
+                <Filters
+                    columns={ columns }
+                    className={ this.props.filtersClasses }
+                    onSort={ this.props.onSort }
+                    onFilter={ this.props.onFilter }
+                    currFilters={ this.props.currFilters }
+                    filterPosition={ this.props.filterPosition }
+                    onExternalFilter={ this.props.onExternalFilter }
+                    selectRow={ selectRow }
+                    expandRow={ expandRow }
+                />
+            )}
+
+          </table>
+          <Body
+              className={ this.props.bodyClasses }
+              data={ this.getData() }
+              keyField={ keyField }
+              tabIndexCell={ tabIndexCell }
               columns={ columns }
-              className={ this.props.filtersClasses }
-              onSort={ this.props.onSort }
-              onFilter={ this.props.onFilter }
-              currFilters={ this.props.currFilters }
-              filterPosition={ this.props.filterPosition }
-              onExternalFilter={ this.props.onExternalFilter }
+              isEmpty={ this.isEmpty() }
+              visibleColumnSize={ this.visibleColumnSize() }
+              noDataIndication={ noDataIndication }
+              cellEdit={ cellEdit }
               selectRow={ selectRow }
               expandRow={ expandRow }
-            />
-          )}
-          <Body
-            className={ this.props.bodyClasses }
-            data={ this.getData() }
-            keyField={ keyField }
-            tabIndexCell={ tabIndexCell }
-            columns={ columns }
-            isEmpty={ this.isEmpty() }
-            visibleColumnSize={ this.visibleColumnSize() }
-            noDataIndication={ noDataIndication }
-            cellEdit={ cellEdit }
-            selectRow={ selectRow }
-            expandRow={ expandRow }
-            rowStyle={ rowStyle }
-            rowClasses={ rowClasses }
-            rowEvents={ rowEvents }
+              rowStyle={ rowStyle }
+              rowClasses={ rowClasses }
+              rowEvents={ rowEvents }
+              tableClass={ tableClass }
           />
           {hasFooter && (
-            <Footer
-              data={ this.getData() }
-              columns={ columns }
-              selectRow={ selectRow }
-              expandRow={ expandRow }
-              className={ this.props.footerClasses }
-            />
+              <Footer
+                  data={ this.getData() }
+                  columns={ columns }
+                  selectRow={ selectRow }
+                  expandRow={ expandRow }
+                  className={ this.props.footerClasses }
+              />
           )}
-        </table>
-      </div>
+
+        </div>
     );
   }
 }

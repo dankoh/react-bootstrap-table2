@@ -11,6 +11,7 @@ import RowSection from './row/row-section';
 import Const from './const';
 import withRowSelection from './row-selection/row-consumer';
 import withRowExpansion from './row-expand/row-consumer';
+import { FixedSizeList as List } from 'react-window';
 
 class Body extends React.Component {
   constructor(props) {
@@ -61,17 +62,17 @@ class Body extends React.Component {
       rowClasses,
       rowEvents,
       expandRow,
-      className
+      className,
+      tableClass
     } = this.props;
 
     let content;
-
     if (isEmpty) {
       const indication = _.isFunction(noDataIndication) ? noDataIndication() : noDataIndication;
       if (!indication) {
         return null;
       }
-      content = <RowSection content={ indication } colSpan={ visibleColumnSize } />;
+      content = <RowSection content={indication} colSpan={visibleColumnSize}/>;
     } else {
       const selectRowEnabled = selectRow.mode !== Const.ROW_SELECT_DISABLED;
       const expandRowEnabled = !!expandRow.renderer;
@@ -87,8 +88,10 @@ class Body extends React.Component {
         additionalRowProps.selectRow = selectRow;
       }
 
-      content = data.map((row, index) => {
-        const key = _.get(row, keyField);
+
+      const Row = ({ index, style }) => {
+        const key = _.get(data[index], keyField);
+        const row = data[index];
         const baseRowProps = {
           key,
           row,
@@ -103,16 +106,32 @@ class Body extends React.Component {
           ...additionalRowProps
         };
 
-        baseRowProps.style = _.isFunction(rowStyle) ? rowStyle(row, index) : rowStyle;
-        baseRowProps.className = (_.isFunction(rowClasses) ? rowClasses(row, index) : rowClasses);
+        const UserStyle = _.isFunction(rowStyle) ? rowStyle(row, index) : rowStyle;
+        baseRowProps.style = { ...style, ...UserStyle };
+        baseRowProps.className = (_.isFunction(rowClasses) ? rowClasses(data[index], index) : rowClasses);
+        return (
+            <this.RowComponent {...baseRowProps} />
+        );
+      };
 
-        return <this.RowComponent { ...baseRowProps } />;
-      });
+      const TableBody = ({ children, ...props }) => (
+          <table {...props} className={tableClass}>
+            <tbody className={className}>{children}</tbody>
+          </table>
+      );
+
+      return (
+          <List
+              className="List"
+              height={300}
+              itemCount={data.length}
+              itemSize={35}
+              innerElementType={TableBody}
+          >
+            {Row}
+          </List>
+      );
     }
-
-    return (
-      <tbody className={ className }>{ content }</tbody>
-    );
   }
 }
 
